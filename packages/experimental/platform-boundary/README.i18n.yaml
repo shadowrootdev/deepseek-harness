@@ -1,0 +1,43 @@
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write packages/experimental/platform-boundary/README.md
+/:
+  en: d9a20e7c185c01f0
+  zh: bc4ade04c4f66645
+/deepseek-ai-dsh-experimental-platform-boundary:
+  en: bc0dff5e706e63d1
+  zh: bc8cff01495e5288
+/deepseek-ai-dsh-experimental-platform-boundary/summary:
+  en: 8e6e6a4c460bfcc5
+  zh: a0bc46ce50f60bbf
+/deepseek-ai-dsh-experimental-platform-boundary/table-of-contents:
+  en: f966c53d3adeff43
+  zh: 5c172125e0d8ced1
+/deepseek-ai-dsh-experimental-platform-boundary/use-this-package:
+  en: bbff250eba0f1b89
+  zh: 0a618f05cc88ee2b
+/deepseek-ai-dsh-experimental-platform-boundary/use-this-package/classifying-one-specifier:
+  en: 4942f8e93840f103
+  zh: 42f833417c896d9d
+/deepseek-ai-dsh-experimental-platform-boundary/use-this-package/checking-a-source-file:
+  en: d8ba012932e312c7
+  zh: 2fc1498498f7486e
+/deepseek-ai-dsh-experimental-platform-boundary/use-this-package/scope-of-the-check:
+  en: 6d80d0974dd15600
+  zh: ffcfc360ffdec47a
+/deepseek-ai-dsh-experimental-platform-boundary/understand-the-implementation:
+  en: 1d9107dac9748357
+  zh: 0b61cdc3e24b888f
+/deepseek-ai-dsh-experimental-platform-boundary/composition-tests:
+  en: 38fdaaab4ad68b6d
+  zh: 7a395f4a627ff540
+/deepseek-ai-dsh-experimental-platform-boundary/related-documentation:
+  en: 10a0c13e946aa36d
+  zh: 18a2879beb97c9d0
+/deepseek-ai-dsh-experimental-platform-boundary/known-limitations-and-deferred-work:
+  en: a5085718d1d44c08
+  zh: 347f9c03a6c936a8
+/deepseek-ai-dsh-experimental-platform-boundary/known-limitations-and-deferred-work/dev-note:
+  en: e67f633dc6fe7773
+  zh: 3bb0c20c93f16f98

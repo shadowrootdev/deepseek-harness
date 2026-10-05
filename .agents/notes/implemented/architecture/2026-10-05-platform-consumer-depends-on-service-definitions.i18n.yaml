@@ -1,0 +1,19 @@
+# Bilingual-pair consistency record for 2026-10-05-platform-consumer-depends-on-service-definitions.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-10-05-platform-consumer-depends-on-service-definitions.md
+/agent-note-platform-consumes-runtime-service-definitions:
+  en: f111849af5c0c7a6
+  zh: 232e9114e47ea8b6
+/agent-note-platform-consumes-runtime-service-definitions/problem:
+  en: 7ba57aad4292ce8e
+  zh: b9a39c901885df5b
+/agent-note-platform-consumes-runtime-service-definitions/decision:
+  en: 45b1272b25ec281e
+  zh: 82c454f2c37c0e45
+/agent-note-platform-consumes-runtime-service-definitions/alternatives-considered:
+  en: 2d0b775c35fe5f3b
+  zh: 3b7188be3df2216e
+/agent-note-platform-consumes-runtime-service-definitions/consequences:
+  en: 15119e0a92e3f9cb
+  zh: 23563a4fefcee861

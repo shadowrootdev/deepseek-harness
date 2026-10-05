@@ -146,8 +146,8 @@ describe('experimental workspace constraints', () => {
     ])
   })
 
-  it('keeps the current experimental publication set unrestricted', () => {
-    expect(PRIVATE_EXPERIMENTAL_PACKAGE_DIRECTORIES).toEqual([])
+  it('pins the explicit set of private experimental packages', () => {
+    expect(PRIVATE_EXPERIMENTAL_PACKAGE_DIRECTORIES).toEqual(['packages/experimental/platform-boundary'])
   })
 
   it('limits the public default to experimental package directories', () => {
