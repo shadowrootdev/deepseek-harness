@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-Experimental prototypes may change their contracts and carry no support promise. New packages publish by default; private packages must also appear in the [private-exception list](../../scripts/experimental-package-policy.ts). All current packages publish under their `@deepseek-ai/dsh-experimental-*` names, including the opt-in Agent Teams composition, Auto review, Cua Driver providers, browser-use backends, cross-realm Inspector, CPython PTC backend, and browser-worker preview libraries. Released products outside this group must not depend on experimental packages. The dsh installation ships the Agent Teams, voice input, and Auto review packages as optional bundles switched on from the Web sidebar's Plugins page ([decision](../../.agents/notes/implemented/architecture/2026-09-21-experimental-capabilities-as-optional-bundles.md)); the other packages are libraries or explicit compositions.
+Experimental prototypes may change their contracts and carry no support promise. New packages publish by default under their `@deepseek-ai/dsh-experimental-*` names. A package excluded from publication must appear in the [private-exception list](../../scripts/experimental-package-policy.ts); the `platform-boundary` verification package is the current private entry. Released products outside this group must not depend on experimental packages. The dsh installation ships the Agent Teams, voice input, and Auto review packages as optional bundles switched on from the Web sidebar's Plugins page ([decision](../../.agents/notes/implemented/architecture/2026-09-21-experimental-capabilities-as-optional-bundles.md)); the other packages are libraries or explicit compositions.
 
 ## Table of Contents
 
@@ -48,6 +48,8 @@ Experimental prototypes may change their contracts and carry no support promise.
 | [`tool-agent-team`](tool-agent-team/README.md) | Nine tools that let the model create, message, and coordinate teammates | registers scoped tools on `ctx.tools` |
 | [`webworker-packer`](webworker-packer/README.md) | Builds the gzip-compressed VFS image consumed by the browser worker preview | library and CLI — no ctx key |
 | [`webworker-runtime`](webworker-runtime/README.md) | Runs the harness plugin tree inside a dedicated browser worker | library and worker entry — no ctx key |
+| [`platform-boundary`](platform-boundary/README.md) | Textual platform-boundary checker for platform-owned consumer imports | — |
+| [`platform-consumer`](platform-consumer/README.md) | Platform-owned consumer: lateral identities, fail-closed tool policy, read-only observations | `ctx.platformConsumer` |
 
 -----
 
