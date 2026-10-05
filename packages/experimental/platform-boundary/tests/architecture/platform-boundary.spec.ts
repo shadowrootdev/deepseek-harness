@@ -30,9 +30,9 @@ describe('findPlatformBoundaryViolations', () => {
     expect(findPlatformBoundaryViolations(readFixture('valid-consumer.ts'))).toEqual([])
   })
 
-  it('accepts the platform consumer used by the real composition tests', () => {
+  it('accepts the shipped platform consumer source', () => {
     const source = readFileSync(
-      fileURLToPath(new URL('../support/platform-observer.ts', import.meta.url)),
+      fileURLToPath(new URL('../../../platform-consumer/src/index.ts', import.meta.url)),
       'utf8',
     )
     expect(findPlatformBoundaryViolations(source)).toEqual([])

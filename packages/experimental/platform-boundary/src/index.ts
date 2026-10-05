@@ -26,8 +26,10 @@
  */
 export const PLATFORM_SERVICE_DEFINITIONS: readonly string[] = [
   '@deepseek-ai/dsh-agent',
+  '@deepseek-ai/dsh-jobs',
   '@deepseek-ai/dsh-llm',
   '@deepseek-ai/dsh-session',
+  '@deepseek-ai/dsh-subagent',
   '@deepseek-ai/dsh-tools',
 ]
 

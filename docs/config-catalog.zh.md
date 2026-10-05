@@ -1062,6 +1062,47 @@ export interface InspectorOptions {
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-experimental-inspector -->
 
+<!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-experimental-platform-consumer -->
+<a id="deepseek-aidsh-experimental-platform-consumer"></a>
+
+## `@deepseek-ai/dsh-experimental-platform-consumer`
+
+- `inject`: `tools` · `agents`
+- `source`: [`packages/experimental/platform-consumer/src/index.ts:123`](../packages/experimental/platform-consumer/src/index.ts)
+
+```ts config-catalog
+/** Plugin config the Loader validates against {@link Config}. */
+export interface Config {
+  /** Platform project this mounted consumer drives. */
+  readonly projectId: string
+  /** Run identity to reuse; absent mints one per mount. */
+  readonly runId?: string
+  /** Fail-closed policy rules; absent installs no policy and imposes nothing. */
+  readonly policy?: readonly PlatformPolicyRule[]
+  /** Maximum retained entries per observation ring; defaults to 1000. */
+  readonly observationLimit?: number
+}
+
+/** One tool-policy rule, evaluated on `tools/pre-execute` and, when monotone, as a guard. */
+export interface PlatformPolicyRule {
+  /** Tool name the rule applies to; absent matches every call. */
+  readonly tool?: string
+  /** Required project id; absent matches every project. */
+  readonly projectId?: string
+  /** Required run id; absent matches every run. */
+  readonly runId?: string
+  /** Required task id; absent matches every task. */
+  readonly taskId?: string
+  /** Pre-execute decision the rule installs. */
+  readonly decision: 'allow' | 'deny' | 'ask'
+  /** Reason carried by a deny or ask decision. */
+  readonly reason?: string
+  /** When true on a deny rule, the denial is also enforced monotonically by a guard. */
+  readonly monotone?: boolean
+}
+```
+<!-- END GENERATED config-catalog:@deepseek-ai/dsh-experimental-platform-consumer -->
+
 <!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-experimental-ptc-runtime-python -->
 <a id="deepseek-aidsh-experimental-ptc-runtime-python"></a>
 
@@ -4499,6 +4540,7 @@ export interface Config {
 | `@deepseek-ai/dsh-experimental-agent-team-profile` | — | [`packages/experimental/agent-team-profile/src/index.ts`](../packages/experimental/agent-team-profile/src/index.ts) |
 | `@deepseek-ai/dsh-experimental-browser-use-runtime` | — | [`packages/experimental/browser-use-runtime/src/index.ts`](../packages/experimental/browser-use-runtime/src/index.ts) |
 | `@deepseek-ai/dsh-experimental-inspector-profile` | — | [`packages/experimental/inspector-profile/src/index.ts`](../packages/experimental/inspector-profile/src/index.ts) |
+| `@deepseek-ai/dsh-experimental-platform-boundary` | — | [`packages/experimental/platform-boundary/src/index.ts`](../packages/experimental/platform-boundary/src/index.ts) |
 | `@deepseek-ai/dsh-experimental-voice-input-bundle` | — | [`packages/experimental/voice-input-bundle/src/index.ts`](../packages/experimental/voice-input-bundle/src/index.ts) |
 | `@deepseek-ai/dsh-experimental-webworker-packer` | — | [`packages/experimental/webworker-packer/src/index.ts`](../packages/experimental/webworker-packer/src/index.ts) |
 | `@deepseek-ai/dsh-experimental-webworker-runtime` | — | [`packages/experimental/webworker-runtime/src/index.ts`](../packages/experimental/webworker-runtime/src/index.ts) |

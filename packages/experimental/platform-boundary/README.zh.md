@@ -9,13 +9,13 @@ kind: "package-library"
 
 ## 概述
 
-`platform-boundary` 按两份显式允许列表——DeepSeek Runtime Service Definition 与 `packages/util/*` 包——对平台自有消费方的模块导入进行分类。`extractModuleSpecifiers` 读取源码文本，`classifyPlatformImport` 判定某个 specifier 能否穿越到 Runtime，`findPlatformBoundaryViolations` 则返回每个指向具体包、而非允许列表项的 `@deepseek-ai/dsh-*` 导入。检查器在运行时没有任何导入。这个私有实验包是 Platform 到 Runtime 边界的验证产物，尚不存在生产消费方；它还承载真实组合测试，覆盖 lifecycle、身份、cancellation、fail-closed policy 与 monotonic deny。
+`platform-boundary` 按两份显式允许列表——DeepSeek Runtime Service Definition 与 `packages/util/*` 包——对平台自有消费方的模块导入进行分类。`extractModuleSpecifiers` 读取源码文本，`classifyPlatformImport` 判定某个 specifier 能否穿越到 Runtime，`findPlatformBoundaryViolations` 则返回每个指向具体包、而非允许列表项的 `@deepseek-ai/dsh-*` 导入。检查器在运行时没有任何导入。这个私有实验包是 Platform 到 Runtime 边界的验证产物；已交付的 `@deepseek-ai/dsh-experimental-platform-consumer` 正是它所验证的消费方，真实组合测试由该包承载，覆盖 lifecycle、身份、cancellation、fail-closed policy 与 monotonic deny。
 
 ## 目录
 
 - [使用本包](#use-this-package)
 - [理解实现](#understand-the-implementation)
-- [组合测试](#composition-tests)
+- [架构检查](#architecture-check)
 - [相关文档](#related-documentation)
 - [已知限制与延期工作](#known-limitations-and-deferred-work)
 - [开发备注](#dev-note)
@@ -27,7 +27,7 @@ kind: "package-library"
 
 ### 对单个 specifier 分类
 
-`classifyPlatformImport(specifier)` 返回 `allowed` 或 `forbidden`。它允许相对 specifier、`node:*` 内建模块、`@deepseek-ai/dsh-*` 之外的包、`PLATFORM_UTILITY_PACKAGES` 中列出的已发布 `packages/util/*` 包，以及 `PLATFORM_SERVICE_DEFINITIONS` 中的 Service Definition（`@deepseek-ai/dsh-agent`、`@deepseek-ai/dsh-llm`、`@deepseek-ai/dsh-session`、`@deepseek-ai/dsh-tools`）。其他所有 `@deepseek-ai/dsh-*` 包（包括其子路径）都被禁止，因此诸如 `@deepseek-ai/dsh-llm-deepseek` 这样的具体 provider 不会在无意间变为可导入。
+`classifyPlatformImport(specifier)` 返回 `allowed` 或 `forbidden`。它允许相对 specifier、`node:*` 内建模块、`@deepseek-ai/dsh-*` 之外的包、`PLATFORM_UTILITY_PACKAGES` 中列出的已发布 `packages/util/*` 包，以及 `PLATFORM_SERVICE_DEFINITIONS` 中的 Service Definition（`@deepseek-ai/dsh-agent`、`@deepseek-ai/dsh-jobs`、`@deepseek-ai/dsh-llm`、`@deepseek-ai/dsh-session`、`@deepseek-ai/dsh-subagent`、`@deepseek-ai/dsh-tools`）。其他所有 `@deepseek-ai/dsh-*` 包（包括其子路径）都被禁止，因此诸如 `@deepseek-ai/dsh-llm-deepseek` 这样的具体 provider 不会在无意间变为可导入。
 
 ### 检查一个源码文件
 
@@ -60,23 +60,12 @@ const violations = findPlatformBoundaryViolations("import { a } from '@deepseek-
 
 -----
 
-<a id="composition-tests"></a>
-## 组合测试
+<a id="architecture-check"></a>
+## 架构检查
 
-`tests/integration/platform-boundary-composition.spec.ts` 从临时 `cordis.yml` 启动真实 Loader 组合，并把平台消费方挂在 runtime 旁边。harnais 与消费方遵循不同的规则：
+`tests/architecture/platform-boundary.spec.ts` 对已交付消费方的源码 `packages/experimental/platform-consumer/src/index.ts` 运行 `findPlatformBoundaryViolations`，要求零违规。该消费方只导入 Service Definition、Cordis、`schemastery` 与 `dsh-brand`。
 
-- **组合 harnais** 负责组装 runtime，因此会点名具体包——`dsh-agent-loop`、`dsh-session-projection`、`dsh-system-prompt`、Cordis Loader 与 Include——就像部署时组合它们那样。在此点名它们并非 Platform 导入。
-- **平台消费方**是 [`tests/support/platform-observer.ts`](tests/support/platform-observer.ts)。它只导入 Service Definition、Cordis 与一个配置 schema，并有架构测试对其源码运行 `findPlatformBoundaryViolations`，要求零违规。
-
-消费方观察 `agent/created`、`agent/status`、`session/event`、`agent/turn-stopping` 与轮次 `AbortSignal`；安装一个 `tools/pre-execute` 决策与一个可选的 `ctx.tools.guard()`；并在 `platformObserver` 服务上暴露其记录的事实。测试证明：
-
-- **加载**——组合成功挂载，消费方被加载。
-- **Lifecycle 与身份**——无密钥 `MockAdapter` 轮次记录 `turn/start` 与 `turn/end`，消费方在 `agent/created` 与 `tools/pre-execute` 两处都得到 `agent.id === agent.session.id`。
-- **Cancellation**——`agent.cancel({ kind: 'user' })` 中止轮次 signal，消费方在 signal 与持久 `turn/end` 两处都记录该 cause。
-- **Fail-closed ask**——无批准通道时 `ask` 拒绝该调用，tool 主体从不执行。
-- **Monotonic deny**——即使后续 `tools/pre-execute` 监听器允许该调用，`ctx.tools.guard()` 的拒绝依然成立。
-
-消费方是本包的验证支持，而非已交付插件：它通过文件 URL 挂载，因此 `platformObserver` 服务只存在于这些测试中。目前尚不存在生产 Platform 消费方；一旦出现，本包会被提升为产品角色或被移除，并重新审视[私有例外](../../../scripts/experimental-package-policy.ts)。
+真实的 Loader 组合位于该包的 `packages/experimental/platform-consumer/tests/integration/platform-consumer-composition.spec.ts`。它从临时 `cordis.yml` 启动真实 Loader 组合，把消费方挂在 runtime 旁边，并证明 lifecycle 与身份、cancellation、fail-closed policy、monotonic deny、经真实进程内 subagent 的横向身份继承，以及后台 job 观察。
 
 -----
 
@@ -95,8 +84,8 @@ const violations = findPlatformBoundaryViolations("import { a } from '@deepseek-
 
 - **文本式提取及其假阴性**——`extractModuleSpecifiers` 扫描源码文本而非已解析的模块图，并将模式锚定在行首。注释或字符串字面量里的 specifier 会被报告，而未加引号的 `import(name)`、拼接的 specifier 以及 `import x = require(...)` 会漏掉。检查器是诊断性的：它从不观察运行时值，也不是授权屏障。
 - **工具类允许列表是显式快照**——`PLATFORM_UTILITY_PACKAGES` 列出已发布的 `packages/util/*` 名称，其中若干不带 `dsh-util-` 前缀；新增工具包必须加入该列表，否则检查器会拒绝合法导入。
-- **无生产消费方的验证产物**——本包用于锚定 Platform 到 Runtime 的边界，且没有生产消费方；生产级 Platform 集成会将其提升为产品角色或将其移除，两条路径都会重新审视 `PRIVATE_EXPERIMENTAL_PACKAGE_DIRECTORIES`。
-- **消费方是测试支持，而非已交付插件**——`tests/support/platform-observer.ts` 通过文件 URL 挂载，并不是包的导出，因此 `platformObserver` 服务只存在于组合测试中。
+- **验证产物，自身没有运行时消费方**——本包锚定 Platform 到 Runtime 的导入边界；已交付的 `@deepseek-ai/dsh-experimental-platform-consumer` 正是它所验证的消费方，提升或移除该检查器都会重新审视 `PRIVATE_EXPERIMENTAL_PACKAGE_DIRECTORIES`。
+- **仅诊断**——检查器扫描源码文本，从不强制执行运行时权限；强制执行仍位于 `tools/pre-execute` 与 `ctx.tools.guard()`。
 - **不进入 npm 发布**——本包列在 `PRIVATE_EXPERIMENTAL_PACKAGE_DIRECTORIES` 中，因此其 manifest 设置 `private: true` 且不声明 `publishConfig`。
 
 <a id="dev-note"></a>

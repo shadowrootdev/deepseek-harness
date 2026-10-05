@@ -14,7 +14,7 @@ Platform 只依赖 Runtime Service Definition：`@deepseek-ai/dsh-agent`、`@dee
 
 `@deepseek-ai/dsh-experimental-platform-boundary` 是该规则的验证包。`PLATFORM_SERVICE_DEFINITIONS` 列出被允许的 Service Definition，`PLATFORM_UTILITY_PACKAGES` 列出已发布的 `packages/util/*` 包（其中若干不带 `dsh-util-` 前缀，因此允许范围是一份显式列表，而非前缀匹配）；`findPlatformBoundaryViolations` 报告源码文本中其他所有 `@deepseek-ai/dsh-*` 导入。检查器是无依赖的文本式扫描：它识别静态 `import` 与 `export ... from`、副作用 `import`、动态 `import()` 与 CommonJS `require()`，将模式锚定在行首，并会漏掉未加引号的 `import(name)`、拼接的 specifier 以及 `import x = require(...)`。它是诊断性的——对手写源码的 lint 与架构检查——绝不是运行时授权屏障；工具权限由运行时路径上的 `tools/pre-execute` 与 `ctx.tools.guard()` 强制执行。
 
-本包是私有的实验性验证产物，没有生产消费方。其消费方 `tests/support/platform-observer.ts` 是通过文件 URL 经 Loader 挂载的测试支持，`platformObserver` 服务只存在于组合测试中。当生产 Platform 消费方出现时，本包会被提升为产品角色或被移除，并重新审视 [`scripts/experimental-package-policy.ts`](../../../../scripts/experimental-package-policy.ts) 中的私有例外。
+本包是私有的实验性验证产物。其消费方是已交付的 `@deepseek-ai/dsh-experimental-platform-consumer`：它在插件自有状态中附加横向的 `projectId`/`runId`/`taskId` 身份，在 `tools/pre-execute` 与 `ctx.tools.guard()` 上安装 fail-closed 的单调工具策略，并在 `ctx.platformConsumer` 上暴露只读观察结果。`PLATFORM_SERVICE_DEFINITIONS` 还允许 `dsh-jobs` 与 `dsh-subagent`。真实的组合测试位于消费方包中，若该检查器被提升或移除，则重新审视 [`scripts/experimental-package-policy.ts`](../../../../scripts/experimental-package-policy.ts) 中的私有例外。
 
 ## Alternatives considered
 
@@ -28,4 +28,6 @@ Platform 只依赖 Runtime Service Definition：`@deepseek-ai/dsh-agent`、`@dee
 
 ## Consequences
 
-边界规则可对源码文本执行，但只覆盖扫描器识别的导入形式；工具类允许范围是 `packages/util/*` 的一份快照，新增工具包必须更新它。组合测试证明消费方能够加载、观察 lifecycle 与身份、观察 cancellation、在无批准通道的 ask 上 fail closed，且无法反转 monotonic guard。这些测试通过文件 URL 挂载观察者，因此 `platformObserver` 服务仅限测试；目前也没有生产消费方足以支撑提升。
+边界规则可对源码文本执行，但只覆盖扫描器识别的导入形式；工具类允许范围是 `packages/util/*` 的一份快照，新增工具包必须更新它。组合测试证明消费方能够加载、观察 lifecycle 与身份、观察 cancellation、在无批准通道的 ask 上 fail closed，且无法反转 monotonic guard。这些测试位于消费方包中，并挂载真实的 Loader 组合；该消费方为可选启用，未由任何默认 profile 挂载。
+
+已交付消费方的策略分两个阶段执行。`tools/pre-execute` 安装 fail-closed 默认：未匹配的调用或没有 Agent 的调用会被拒绝，而已配置的 `allow`/`deny`/`ask` 规则按首个匹配决定。只有标记 `monotone` 的 `deny` 规则会额外注册到 `ctx.tools.guard()`，它在 pre-execute 链之后运行且无法被反转；非 monotone 的 `deny` 与 fail-closed 默认都可能被更早的 pre-execute 监听器短路，因此需要硬边界的部署会将其 deny 规则标记为 monotone。面向模型的策略原因会剥离控制字符并截断至 500 个字符。每个观察列表是一个由 `observationLimit` 个条目（默认 1000）构成的有界环。消费方只观察由其自身 task 拥有的 job。
